@@ -36,7 +36,7 @@ class PowerUp extends PositionComponent with CollisionCallbacks {
     ));
 
     //ADD POWER UP TYPE NUMBER
-    final regular = TextPaint(style: const TextStyle(fontSize: powerUpTextSize));
+    final regular = TextPaint(style: const TextStyle(fontSize: powerUpTextSize, color: Color(0xFFFFFFFF),));
 
     add(TextComponent(
         text: type.toString(),

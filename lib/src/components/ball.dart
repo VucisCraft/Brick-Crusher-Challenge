@@ -52,11 +52,27 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
     super.update(dt);
     //POSITION WHERE SHOULD MOVE THIS UPDATE
     Vector2 positionMove = position + velocity * dt;
+    Vector2? newPosition = Vector2.zero();
 
-    //CHECK FOR OBSTACLES BETWEEN CURRENT AND MOVE POSITION
-    Vector2? newPosition = performRaycast(position, positionMove, velocity);
+    if(position.distanceTo(positionMove) > radius){
+      //CHECK FOR OBSTACLES BETWEEN CURRENT AND MOVE POSITION
+      newPosition = performRaycast(position, positionMove, velocity);
+    }else {
+      newPosition = positionMove;
+    }
 
-    position = newPosition!;
+    //OUT OF SCREEN CHECK
+    if(newPosition!.x <= 0){
+      newPosition.x *= 0;
+    }else if(newPosition.x >= game.width){
+      newPosition.x = game.width;
+    }else if(newPosition.y <= 0){
+      newPosition.y = 0;
+    }else if(newPosition.y >= game.height){
+      newPosition.y = game.height;
+    }
+
+    position = newPosition;
   }
 
   //RETURN MOVE POSITION OR INTERSECTION POINT IF THERE WAS OBSTACLE
@@ -80,8 +96,13 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
   }
 
   @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollision(intersectionPoints, other);
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollisionStart(intersectionPoints, other);
+
+    if(soundsPlay){
+        FlameAudio.play('hit.wav', volume: soundsVolume);
+    }
+
     if(other is PlayArea){
       bool flipX = false;
       bool flipY = false;
@@ -94,7 +115,7 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
           }else if(intersectionPoint.y <= 0){
             flipY = true;
           }else if(intersectionPoint.y >= game.height){
-            if(game.testMode){
+            if(testMode){
               flipY = true;
             }
           }
@@ -107,7 +128,7 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
         velocity.y = -velocity.y;
       }
 
-      if(!game.testMode){
+      if(!testMode){
         if(intersectionPoints.first.y >= game.height){
           add(RemoveEffect(
             delay: 0.35,
@@ -134,14 +155,6 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
           velocity.x = -velocity.x;
         }
       }
-    }
-  }
-
-  @override
-  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollisionStart(intersectionPoints, other);
-    if(soundsPlay){
-      FlameAudio.play('hit.wav', volume: soundsVolume);
     }
   }
 }

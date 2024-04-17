@@ -48,9 +48,6 @@ class BrickBreaker extends FlameGame
   final ValueNotifier<int> level = ValueNotifier(1);
   final ValueNotifier<int> score = ValueNotifier(0);
 
-  //ENABLE GAME TEST MODE
-  final testMode = false;
-
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
