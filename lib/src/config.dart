@@ -11,7 +11,7 @@ const gameHeight = 1600.0;
 const bgColor = Color.fromARGB(255, 252, 245, 228);
 
 //SOUND
-const bool soundsPlay = false;
+const bool soundsPlay = true;
 const double soundsVolume = 0.3;
 
 //BALL
