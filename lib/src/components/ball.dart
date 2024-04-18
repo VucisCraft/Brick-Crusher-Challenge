@@ -1,11 +1,9 @@
-
 import 'package:brick_crusher_challenge/src/components/brick_crusher_challenge.dart';
 import 'package:brick_crusher_challenge/src/components/components.dart';
 import 'package:brick_crusher_challenge/src/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -87,7 +85,7 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
   //BALL COLLISION SOUND
   playCollisionSound(){
     if(soundsPlay){
-      FlameAudio.play('hit.wav', volume: soundsVolume);
+      game.audioManager.audioBallCollision.start(volume: soundsVolume);
     }
   }
 

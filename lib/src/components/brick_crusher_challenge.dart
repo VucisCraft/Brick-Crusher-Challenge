@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:brick_crusher_challenge/src/components/components.dart';
 import 'package:brick_crusher_challenge/src/config.dart';
+import 'package:brick_crusher_challenge/src/managers/audio_manager.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -41,6 +41,9 @@ class BrickBreaker extends FlameGame
     }
   }
 
+  //AUDIO
+  AudioManager audioManager = AudioManager();
+
   //MOVEMENT
   Vector2? _pointerStartPosition;
 
@@ -53,8 +56,7 @@ class BrickBreaker extends FlameGame
     super.onLoad();
     //LOAD AUDIO
     if (soundsPlay) {
-      await FlameAudio.audioCache
-          .loadAll(['hit.wav', 'shoot.wav', 'powerUp.wav']);
+      add(audioManager);
     }
 
     //FPS COUNTER

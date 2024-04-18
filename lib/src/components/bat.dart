@@ -7,7 +7,6 @@ import 'package:brick_crusher_challenge/src/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame_audio/flame_audio.dart';
 
 enum BatState { idle, moveLeft, moveRight }
 
@@ -111,7 +110,7 @@ class Bat extends PositionComponent with HasGameReference<BrickBreaker> {
   //SHOOTING LOGIC
   void shoot() {
     if (soundsPlay) {
-      FlameAudio.play('shoot.wav', volume: soundsVolume);
+      game.audioManager.audioBatShoot.start(volume: soundsVolume);
     }
     game.world.addAll([
       Bullet(position: Vector2(position.x - size.x / 2, position.y)),

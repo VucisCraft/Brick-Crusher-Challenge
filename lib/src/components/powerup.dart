@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:flame_audio/flame_audio.dart';
+import 'package:brick_crusher_challenge/src/components/brick_crusher_challenge.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_crusher_challenge/src/components/components.dart';
 import 'package:brick_crusher_challenge/src/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
-class PowerUp extends PositionComponent with CollisionCallbacks {
+class PowerUp extends PositionComponent with HasGameRef<BrickBreaker>, CollisionCallbacks {
   PowerUp({
     required super.position,
     required this.type
@@ -64,7 +64,7 @@ class PowerUp extends PositionComponent with CollisionCallbacks {
     if(other is Bat) {
       //POWER UP ADD
       if(soundsPlay) {
-        FlameAudio.play('powerUp.wav', volume: soundsVolume);
+        game.audioManager.audioPowerUp.start(volume: soundsVolume);
       }
       other.addPowerUp(type);
       removeFromParent();
