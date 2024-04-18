@@ -1,7 +1,7 @@
 name: "brick_crusher_challenge"
 description: "Arcade game where the player controls a paddle at the bottom of the screen, bouncing a ball to break a wall of bricks at the top."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.1
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

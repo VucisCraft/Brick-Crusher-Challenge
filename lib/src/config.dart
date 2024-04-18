@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 //GENERAL
-const bool testMode = true;
+const bool testMode = false;
 
 //WINDOW
 const gradientOne = Color.fromARGB(255, 186, 237, 253);
