@@ -61,7 +61,6 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
     ballState = BallState.ideal;
 
     if(other is PlayArea){
-      playCollisionSound();
       reflectFromPlayArea(intersectionPoints);
       ballState = BallState.release;
       return;
@@ -84,7 +83,7 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
 
   //BALL COLLISION SOUND
   playCollisionSound(){
-    if(soundsPlay){
+    if(soundsPlay && !isRemoved){
       game.audioManager.audioBallCollision.start(volume: soundsVolume);
     }
   }
@@ -129,11 +128,12 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
     //GAME OVER WHEN PASS BOTTOM
     if(isBottomHit && velocity.y > 0){
       if(testMode){
+        playCollisionSound();
         velocity.y *= -1;
       }else {
         //GAME OVER BALL Y POSITION CHECK
         add(RemoveEffect(
-          delay: 0.35,
+          delay: 0.5,
           onComplete: () {
               game.playState = PlayState.gameOver;
           },
@@ -143,14 +143,17 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
 
     //BAUNCE FROM PLAY AREA WALLS
     if(isTopHit && velocity.y < 0){
+      playCollisionSound();
       velocity.y *= -1;
     }
 
     if(isLeftHit && velocity.x < 0){
+      playCollisionSound();
       velocity.x *= -1;
     }
 
     if(isRightHit && velocity.x > 0){
+      playCollisionSound();
       velocity.x *= -1;
     }
   }
