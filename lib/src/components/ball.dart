@@ -4,6 +4,7 @@ import 'package:brick_crusher_challenge/src/components/components.dart';
 import 'package:brick_crusher_challenge/src/config.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -30,15 +31,15 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
 
   @override
   Future<void> onLoad() {
+    //INITIAL BALL MOVEMENT VELOCITY
     velocity.setFrom(Vector2(randomNumber * 1, -5));
-    //SCALE VELOCITY PER LEVEL VALUE
-    double scale = game.level.value.toDouble() / 4;
-    //SET BALL MOVEMENT SPEED INCREASE
-    velocity.scale(1 + scale);
-    //RELEASE BALL
+    //INCREASE BALL SPEED PER LEVEL VALUE
+    speed = 1 + (game.level.value.toDouble() / 4);
+    //START BALL MOVEMENT
     ballState = BallState.release;
 
     add(ballHitbox);
+
     return super.onLoad();
   }
 
@@ -55,27 +56,24 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
       ..x += velocity.x  * speed
       ..y += velocity.y  * speed;
   }
-  
+ 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     ballState = BallState.ideal;
 
-    if(soundsPlay){
-        FlameAudio.play('hit.wav', volume: soundsVolume);
-    }
-
     if(other is PlayArea){
-      if(intersectionPoints.length == 1){
-        reflectFromPlayArea(intersectionPoints);
-      } 
+      playCollisionSound();
+      reflectFromPlayArea(intersectionPoints);
       ballState = BallState.release;
       return;
     } else if (other is Bat){
+      playCollisionSound();
       reflectFromBat(intersectionPoints, other);
       ballState = BallState.release;
       return;
     } else if (other is Brick) {  
+      playCollisionSound();
       other.removeBrick();
       reflectFromBrick(intersectionPoints);
       ballState = BallState.release;
@@ -85,57 +83,37 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
     }
   }
 
-  @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-     if(other is PlayArea){
-      if(intersectionPoints.length != 1){
-        final intersectionPointsList = intersectionPoints.toList();
-        final averageX = (intersectionPointsList[0].x + intersectionPointsList[1].x) / 2;
-        final averageY = (intersectionPointsList[0].y + intersectionPointsList[1].y) / 2;
-        if (intersectionPointsList[0].x == intersectionPointsList[1].x ||
-            intersectionPointsList[0].y == intersectionPointsList[1].y) {
-          sideReflection(Vector2(averageX, averageY), other);
-        } else {
-          cornerReflection(other, averageX, averageY);
+   @override
+  void onCollisionEnd(PositionComponent other) {
+    if(other is PlayArea){
+      if(!testMode){
+        //GAME OVER BALL Y POSITION CHECK
+        if(position.y > game.height){
+          add(RemoveEffect(
+                delay: 0.35,
+                onComplete: () {
+                    game.playState = PlayState.gameOver;
+                },
+            ));
+        }
+
+        //CHECK IF COLLIDED AT THE END OF COLLISION
+        if(position.x <= 0 || position.x >= game.width){
+          velocity.x *= -1;
+        }
+        if(position.y <= 0){
+          velocity.y *= -1;
         }
       }
-      ballState = BallState.release;
-      return;
     }
-    super.onCollision(intersectionPoints, other);
+    super.onCollisionEnd(other);
   }
+  
 
-  void reflectFromPlayArea(Set<Vector2> intersectionPoints) {
-    var isTopHit = false;
-    if(intersectionPoints.first.y == 0 && intersectionPoints.first.y <= position.y){
-      isTopHit = true;
-    }
-    var isBottomHit = false;
-    if(intersectionPoints.first.y == game.height && intersectionPoints.first.y >= position.y){
-      isBottomHit = true;
-      /*
-      add(RemoveEffect(
-          delay: 0.35,
-          onComplete: () {
-              game.playState = PlayState.gameOver;
-          },
-      ));
-      */
-    }
-    var isLeftHit =  false;
-    if(intersectionPoints.first.x == 0 && intersectionPoints.first.x <= position.x){
-      isLeftHit = true;
-    }
-    var isRightHit = false;
-    if(intersectionPoints.first.x == game.width && intersectionPoints.first.x >= position.x){
-      isRightHit = true;
-    }
-
-    if (isTopHit || isBottomHit) {
-      velocity.y *= -1;
-    }
-    if (isLeftHit || isRightHit) {
-      velocity.x *= -1;
+  //BALL COLLISION SOUND
+  playCollisionSound(){
+    if(soundsPlay){
+      FlameAudio.play('hit.wav', volume: soundsVolume);
     }
   }
 
@@ -154,22 +132,35 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
     velocity.x += (position.x - other.position.x) * 4 / other.size.x;
   }
   
-  void sideReflection( Vector2 intersectionPoints, PlayArea other) {
-    final isTopHit = intersectionPoints.y == other.position.y;
-    final isBottomHit = intersectionPoints.y ==
-        other.position.y + other.size.y;
-    final isLeftHit = intersectionPoints.x == other.position.x;
-    final isRightHit = intersectionPoints.x ==
-        other.position.x + other.size.x;
+  void reflectFromPlayArea(Set<Vector2> intersectionPoints) {
+    var isTopHit = false;
+    var isBottomHit = false;
+    var isLeftHit = false;
+    var isRightHit = false;
 
-    if (isTopHit || isBottomHit) {
+    for(Vector2 intersectionPoint in intersectionPoints){
+      if(intersectionPoint.y <= 0){
+        isTopHit = true;
+      }
+
+      if(intersectionPoint.y >= game.height){
+        isBottomHit = true;
+      }
+
+      if(intersectionPoint.x <= 0){
+        isLeftHit = true;
+      }
+
+      if(intersectionPoint.x >= game.width){
+        isRightHit = true;
+      }
+    }
+
+    if (isTopHit || (isBottomHit && testMode)) {
       velocity.y *= -1;
-    } else if (isLeftHit || isRightHit) {
+    }
+    if (isLeftHit || isRightHit) {
       velocity.x *= -1;
     }
-  }
-  
-  void cornerReflection(other, double averageX, double averageY) {
-    velocity *= -1;
   }
 }
