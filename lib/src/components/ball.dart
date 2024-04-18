@@ -80,35 +80,9 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
       return;
     }else{
       ballState = BallState.release;
+      return;
     }
   }
-
-   @override
-  void onCollisionEnd(PositionComponent other) {
-    if(other is PlayArea){
-      if(!testMode){
-        //GAME OVER BALL Y POSITION CHECK
-        if(position.y > game.height){
-          add(RemoveEffect(
-                delay: 0.35,
-                onComplete: () {
-                    game.playState = PlayState.gameOver;
-                },
-            ));
-        }
-
-        //CHECK IF COLLIDED AT THE END OF COLLISION
-        if(position.x <= 0 || position.x >= game.width){
-          velocity.x *= -1;
-        }
-        if(position.y <= 0){
-          velocity.y *= -1;
-        }
-      }
-    }
-    super.onCollisionEnd(other);
-  }
-  
 
   //BALL COLLISION SOUND
   playCollisionSound(){
@@ -129,7 +103,7 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
 
   void reflectFromBat(Set<Vector2> intersectionPoints, Bat other) {
     velocity.y *= -1;
-    velocity.x += (position.x - other.position.x) * 4 / other.size.x;
+    velocity.x += (position.x - other.position.x) * 2 / other.size.x;
   }
   
   void reflectFromPlayArea(Set<Vector2> intersectionPoints) {
@@ -138,28 +112,47 @@ class Ball extends CircleComponent with HasGameRef<BrickBreaker> ,CollisionCallb
     var isLeftHit = false;
     var isRightHit = false;
 
-    for(Vector2 intersectionPoint in intersectionPoints){
-      if(intersectionPoint.y <= 0){
-        isTopHit = true;
-      }
+    if(position.y - radius <= 0){
+      isTopHit = true;
+    }
 
-      if(intersectionPoint.y >= game.height){
-        isBottomHit = true;
-      }
+    if(position.y + radius >= game.height){
+      isBottomHit = true;
+    }
 
-      if(intersectionPoint.x <= 0){
-        isLeftHit = true;
-      }
+    if(position.x - radius <= 0){
+      isLeftHit = true;
+    }
 
-      if(intersectionPoint.x >= game.width){
-        isRightHit = true;
+    if(position.x + radius >= game.width){
+      isRightHit = true;
+    }
+      
+    //GAME OVER WHEN PASS BOTTOM
+    if(isBottomHit && velocity.y > 0){
+      if(testMode){
+        velocity.y *= -1;
+      }else {
+        //GAME OVER BALL Y POSITION CHECK
+        add(RemoveEffect(
+          delay: 0.35,
+          onComplete: () {
+              game.playState = PlayState.gameOver;
+          },
+        ));
       }
     }
 
-    if (isTopHit || (isBottomHit && testMode)) {
+    //BAUNCE FROM PLAY AREA WALLS
+    if(isTopHit && velocity.y < 0){
       velocity.y *= -1;
     }
-    if (isLeftHit || isRightHit) {
+
+    if(isLeftHit && velocity.x < 0){
+      velocity.x *= -1;
+    }
+
+    if(isRightHit && velocity.x > 0){
       velocity.x *= -1;
     }
   }
