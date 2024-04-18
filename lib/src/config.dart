@@ -21,6 +21,13 @@ const double soundsVolume = 0.3;
 const ballColor = Color(0xff277da1);
 const ballRadius = gameWidth * 0.02;
 
+enum BallState {
+  ideal,
+  drag,
+  release,
+  completed,
+}
+
 //BAT
 const batColor = Color(0xff277da1);
 const batWidth = gameWidth * 0.2;
