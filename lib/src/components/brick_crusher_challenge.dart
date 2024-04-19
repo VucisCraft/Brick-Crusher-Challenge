@@ -60,11 +60,11 @@ class BrickBreaker extends FlameGame
     }
 
     //FPS COUNTER
-    if (testMode) {
+    
       final regular = TextPaint(
           style: const TextStyle(
         fontSize: 14.0, // Change the font size here
-        color: Color(0xfff94144),
+        color: Color(0xFF333333),
       ));
 
       add(FpsTextComponent(
@@ -72,7 +72,7 @@ class BrickBreaker extends FlameGame
         anchor: Anchor.topRight,
         textRenderer: regular,
       ));
-    }
+    
 
     camera.viewfinder.anchor = Anchor.topLeft;
     playState = PlayState.welcome;
